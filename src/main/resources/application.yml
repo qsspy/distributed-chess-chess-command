@@ -1,0 +1,15 @@
+server:
+  port: 8083
+
+spring:
+  application:
+    name: chess-command
+
+kafka:
+  bootstrapAddress: ~
+  partitionsPerTopic: 1
+  replicationFactor: 1
+
+logging:
+  level:
+    org.apache.kafka: WARN
