@@ -13,7 +13,8 @@ import org.springframework.stereotype.Service;
 public class KafkaHandler implements MessageBrokerHandler<GameStateMessageDTO> {
 
     @Override
-    public void sendBoardMessage(final GameStateMessageDTO messageBody) {
+    public void sendBoardMessage(final String gameTopicId, final GameStateMessageDTO messageBody) {
         //TODO to implement
+
     }
 }
