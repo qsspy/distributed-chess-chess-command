@@ -21,4 +21,11 @@ public interface BoardEventDao {
      * @return returns deleted board
      */
     List<BoardEvent> delete(final UUID gameTopicId);
+
+    /** Gets board events for given topic
+     *
+     * @param gameTopicId id of the game topic
+     * @return returns board events at given topic
+     */
+    List<BoardEvent> get(final UUID gameTopicId);
 }

@@ -5,11 +5,13 @@ import com.qsspy.chesscommand.domain.BoardPosition;
 import com.qsspy.chesscommand.enums.AlphabeticPosition;
 import com.qsspy.chesscommand.enums.PlayerColor;
 import lombok.Getter;
+import lombok.Setter;
 
 import java.util.List;
 import java.util.Set;
 
 @Getter
+@Setter
 public abstract class Piece {
     protected PlayerColor color;
     protected BoardPosition position;

@@ -28,4 +28,9 @@ public class BoardDaoImpl implements BoardDao {
         boards.remove(gameTopicId);
         return deletedBoard;
     }
+
+    @Override
+    public Board get(UUID gameTopicId) {
+        return boards.get(gameTopicId);
+    }
 }

@@ -3,14 +3,20 @@ package com.qsspy.chesscommand.service;
 import com.qsspy.chesscommand.dao.BoardDao;
 import com.qsspy.chesscommand.dao.BoardEventDao;
 import com.qsspy.chesscommand.domain.Board;
+import com.qsspy.chesscommand.domain.BoardEvent;
 import com.qsspy.chesscommand.domain.BoardPosition;
 import com.qsspy.chesscommand.domain.piece.*;
+import com.qsspy.chesscommand.dto.kafka.BoardEventDTO;
 import com.qsspy.chesscommand.dto.kafka.GameStateMessageDTO;
 import com.qsspy.chesscommand.dto.kafka.PieceStateDTO;
 import com.qsspy.chesscommand.dto.request.BoardMoveRequest;
 import com.qsspy.chesscommand.enums.AlphabeticPosition;
+import com.qsspy.chesscommand.enums.EventType;
 import com.qsspy.chesscommand.enums.PlayerColor;
 import com.qsspy.chesscommand.enums.PlayerTurn;
+import com.qsspy.chesscommand.exception.ChessCommandException;
+import com.qsspy.chesscommand.exception.ForbiddenMoveException;
+import com.qsspy.chesscommand.mapper.BoardEventMapper;
 import com.qsspy.chesscommand.mapper.PieceStateMapper;
 import com.qsspy.chesscommand.mapper.TopicNameMapper;
 import com.qsspy.chesscommand.messagebroker.MessageBrokerHandler;
@@ -34,40 +40,110 @@ public class ChessBoardServiceImpl implements ChessBoardService{
     @Override
     public void calculateBoardStateAndSendMessage(final BoardMoveRequest request, final UUID gameTopicId) {
         //TODO to implement
-    }
 
-    @Override
-    public void initialiseGame(final UUID gameTopicId) {
-        //TODO to implement
-
-        List<Piece> blackPieces = getStartingPieces(PlayerColor.BLACK);
-        List<Piece> whitePieces = getStartingPieces(PlayerColor.WHITE);
-        Board board = new Board(blackPieces, whitePieces);
+        Board board = boardDao.get(gameTopicId);
+        List<BoardEvent> boardEvents = boardEventDao.get(gameTopicId);
 
         GameStateMessageDTO gameStateMessageDTO = new GameStateMessageDTO();
-        gameStateMessageDTO.setPlayerTurn(PlayerTurn.WHITE);
+        BoardEvent boardEvent = new BoardEvent();
+        // zrobienie nowego eventu
+        if(request != null) {
+            // TODO: sprawdz czy szach
 
+            boardEvent.setFromPieceCode(request.getPieceCode());
+            boardEvent.setToPieceCode(request.getSwitchPieceCode());
+            List<Piece> ownPieces = request.getColor() == PlayerColor.WHITE ? board.getWhite() : board.getBlack();
+            List<Piece> opponentPieces = request.getColor() == PlayerColor.WHITE ? board.getBlack() : board.getWhite();
+
+            Piece selectedPiece = ownPieces.stream().filter(piece -> piece.getPieceCode().equals(request.getPieceCode())).findFirst().orElse(null);
+            if(selectedPiece == null) throw new ChessCommandException("Selected piece not found on board");
+            boardEvent.setFromPosition(selectedPiece.getPosition());
+
+            // move or attack
+            BoardPosition destination = new BoardPosition(request.getDestination());
+            Set<BoardPosition> possibleMoves = selectedPiece.getPossibleMoves(board);
+            Set<BoardPosition> possibleAttacks = selectedPiece.getPossibleAttacks(board);
+            Set<BoardPosition> possibleSpecialMoves = selectedPiece.getPossibleSpecialMoves(board);
+            if(possibleMoves.contains(destination)) {
+                // move
+                int selectedPieceIndex = ownPieces.indexOf(selectedPiece);
+                selectedPiece.setPosition(destination);
+                ownPieces.add(selectedPieceIndex, selectedPiece);
+                boardEvent.setEvent(EventType.MOVED);
+
+            } else if(possibleAttacks.contains(destination)) {
+                // attack
+                int selectedPieceIndex = ownPieces.indexOf(selectedPiece);
+                selectedPiece.setPosition(destination);
+                ownPieces.add(selectedPieceIndex, selectedPiece);
+                Piece opponentPieceAtDestination = opponentPieces.stream().filter(piece -> piece.getPosition().equals(destination)).findFirst().orElse(null);
+                opponentPieces.remove(opponentPieceAtDestination);
+                boardEvent.setEvent(EventType.KILLED);
+
+            } else if(possibleSpecialMoves.contains(destination)) {
+                // TODO: special move
+                // move pawns by two
+
+                // roszada
+
+                // wymiana na królową
+                throw new ForbiddenMoveException("Forbidden move");
+            } else {
+                throw new ForbiddenMoveException("Forbidden move");
+            }
+
+            boardEvent.setToPosition(destination);
+
+            board.setBlack(request.getColor() == PlayerColor.BLACK ? ownPieces : opponentPieces);
+            board.setWhite(request.getColor() == PlayerColor.WHITE ? ownPieces : opponentPieces);
+
+            gameStateMessageDTO.setPlayerTurn(request.getColor() == PlayerColor.WHITE ? PlayerTurn.BLACK : PlayerTurn.WHITE);
+        } else {
+            gameStateMessageDTO.setPlayerTurn(PlayerTurn.WHITE);
+        }
+
+        boardEvents.add(boardEvent);
+
+        boardDao.save(gameTopicId, board);
+        boardEventDao.save(gameTopicId, boardEvents);
+
+        // jezeli szach mat / stalemate - turn ustawiony na finished
+        // ustawić na request startowy if null to board event pusty i turn white ;
+
+
+        // convert to dto
         List<PieceStateDTO> black = new ArrayList<>();
-        for(Piece piece: blackPieces) {
+        for(Piece piece: board.getBlack()) {
             black.add(PieceStateMapper.entityToDTO(piece, board));
         }
         gameStateMessageDTO.setBlack(black);
 
         List<PieceStateDTO> white = new ArrayList<>();
-        for(Piece piece: whitePieces) {
+        for(Piece piece: board.getWhite()) {
             white.add(PieceStateMapper.entityToDTO(piece, board));
         }
         gameStateMessageDTO.setWhite(white);
 
-        gameStateMessageDTO.setLastBoardEvents(new ArrayList<>());
-        boardDao.save(gameTopicId, board);
+        List<BoardEventDTO> events = new ArrayList<>();
+        for(BoardEvent event: boardEvents) {
+            events.add(BoardEventMapper.entityToDTO(event));
+        }
+        gameStateMessageDTO.setLastBoardEvents(events);
 
         brokerHandler.sendBoardMessage(TopicNameMapper.toTopicName(gameTopicId), gameStateMessageDTO);
     }
 
     @Override
+    public void initialiseGame(final UUID gameTopicId) {
+        List<Piece> blackPieces = getStartingPieces(PlayerColor.BLACK);
+        List<Piece> whitePieces = getStartingPieces(PlayerColor.WHITE);
+        Board board = new Board(blackPieces, whitePieces);
+        boardDao.save(gameTopicId, board);
+        calculateBoardStateAndSendMessage(null, gameTopicId);
+    }
+
+    @Override
     public void deleteGame(final UUID gameTopicId) {
-        //TODO to implement
         boardDao.delete(gameTopicId);
     }
 

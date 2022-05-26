@@ -11,4 +11,9 @@ import lombok.NoArgsConstructor;
 public class BoardPosition {
     private AlphabeticPosition xPosition;
     private int yPosition;
+
+    public BoardPosition(String position) {
+        this.xPosition = AlphabeticPosition.valueOf(String.valueOf(position.charAt(0)));
+        this.yPosition = (int) position.charAt(1);
+    }
 }

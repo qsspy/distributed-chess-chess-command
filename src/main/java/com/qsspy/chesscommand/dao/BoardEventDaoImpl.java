@@ -29,4 +29,9 @@ public class BoardEventDaoImpl implements BoardEventDao {
         boardEventLists.remove(gameTopicId);
         return boardEvents;
     }
+
+    @Override
+    public List<BoardEvent> get(UUID gameTopicId) {
+        return boardEventLists.get(gameTopicId);
+    }
 }

@@ -20,4 +20,11 @@ public interface BoardDao {
      * @return returns deleted board
      */
     Board delete(final UUID gameTopicId);
+
+    /** Gets board for given topic
+     *
+     * @param gameTopicId id of the game topic
+     * @return returns board at given topic
+     */
+    Board get(final UUID gameTopicId);
 }
