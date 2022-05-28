@@ -4,7 +4,6 @@ import com.qsspy.chesscommand.domain.Board;
 import com.qsspy.chesscommand.domain.BoardPosition;
 import com.qsspy.chesscommand.enums.AlphabeticPosition;
 import com.qsspy.chesscommand.enums.PlayerColor;
-import lombok.RequiredArgsConstructor;
 
 import java.util.HashSet;
 import java.util.List;
@@ -34,7 +33,7 @@ public class KingPiece extends Piece {
                 int xPosition = this.getPosition().getXPosition().getNumericPosition() + i;
                 AlphabeticPosition xPos = AlphabeticPosition.getValue(xPosition);
                 int yPos = this.getPosition().getYPosition() + j;
-                checkIfTaken(allPieces, possibleMoves, xPos, yPos);
+                checkIfPossibleMove(allPieces, possibleMoves, xPos, yPos);
             }
         }
 
@@ -55,7 +54,7 @@ public class KingPiece extends Piece {
                 int xPosition = this.getPosition().getXPosition().getNumericPosition() + i;
                 AlphabeticPosition xPos = AlphabeticPosition.getValue(xPosition);
                 int yPos = this.getPosition().getYPosition() + j;
-                checkIfTakenByOpponent(ownPieces, opponentPieces, possibleAttacks, xPos, yPos);
+                checkIfPossibleAttack(ownPieces, opponentPieces, possibleAttacks, xPos, yPos);
             }
         }
 

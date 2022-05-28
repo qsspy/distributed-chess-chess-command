@@ -29,24 +29,24 @@ public class RookPiece extends Piece {
         int yPos = this.getPosition().getYPosition();
         int xPosition = this.getPosition().getXPosition().getNumericPosition();
         for(int i = xPosition - 1; i >= 1; i--) {
-            if(checkIfTaken(allPieces, possibleMoves, AlphabeticPosition.getValue(i), yPos)) break;
+            if(checkIfPossibleMove(allPieces, possibleMoves, AlphabeticPosition.getValue(i), yPos)) break;
         }
 
         // go right
         for(int i = xPosition + 1; i <= 8; i++) {
-            if(checkIfTaken(allPieces, possibleMoves, AlphabeticPosition.getValue(i), yPos)) break;
+            if(checkIfPossibleMove(allPieces, possibleMoves, AlphabeticPosition.getValue(i), yPos)) break;
         }
 
         // go up
         AlphabeticPosition xPos = this.getPosition().getXPosition();
         for(int i = yPos + 1; i <= 8; i++) {
-            if(checkIfTaken(allPieces, possibleMoves, xPos, i)) break;
+            if(checkIfPossibleMove(allPieces, possibleMoves, xPos, i)) break;
         }
 
         // go down
         xPos = this.getPosition().getXPosition();
         for(int i = yPos - 1; i >= 1; i--) {
-            if(checkIfTaken(allPieces, possibleMoves, xPos, i)) break;
+            if(checkIfPossibleMove(allPieces, possibleMoves, xPos, i)) break;
         }
         
         return possibleMoves;
@@ -63,23 +63,23 @@ public class RookPiece extends Piece {
         int yPos = this.getPosition().getYPosition();
         int xPosition = this.getPosition().getXPosition().getNumericPosition();
         for(int i = xPosition - 1; i >= 1; i--) {
-            if(checkIfTakenByOpponent(ownPieces, opponentPieces, possibleAttacks, AlphabeticPosition.getValue(i), yPos)) break;
+            if(checkIfPossibleAttack(ownPieces, opponentPieces, possibleAttacks, AlphabeticPosition.getValue(i), yPos)) break;
         }
 
         // go right
         for(int i = xPosition + 1; i <= 8; i++) {
-            if(checkIfTakenByOpponent(ownPieces, opponentPieces, possibleAttacks, AlphabeticPosition.getValue(i), yPos)) break;
+            if(checkIfPossibleAttack(ownPieces, opponentPieces, possibleAttacks, AlphabeticPosition.getValue(i), yPos)) break;
         }
 
         // go up
         AlphabeticPosition xPos = this.getPosition().getXPosition();
         for(int i = yPos + 1; i <= 8; i++) {
-            if(checkIfTakenByOpponent(ownPieces, opponentPieces, possibleAttacks, xPos, i)) break;
+            if(checkIfPossibleAttack(ownPieces, opponentPieces, possibleAttacks, xPos, i)) break;
         }
 
         // go down -- check if path to opponent piece isn't blocked by own piece
         for(int i = yPos - 1; i >= 1; i--) {
-            if(checkIfTakenByOpponent(ownPieces, opponentPieces, possibleAttacks, xPos, i)) break;
+            if(checkIfPossibleAttack(ownPieces, opponentPieces, possibleAttacks, xPos, i)) break;
         }
 
         return possibleAttacks;

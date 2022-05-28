@@ -14,6 +14,6 @@ public class BoardPosition {
 
     public BoardPosition(String position) {
         this.xPosition = AlphabeticPosition.valueOf(String.valueOf(position.charAt(0)));
-        this.yPosition = (int) position.charAt(1);
+        this.yPosition = Character.getNumericValue(position.charAt(1));
     }
 }

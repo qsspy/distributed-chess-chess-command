@@ -35,7 +35,7 @@ public class KnightPiece extends Piece {
                 for(int j = 0; j < 2; j++) {
                     AlphabeticPosition xPos = AlphabeticPosition.getValue(xPosition);
                     int yPos = this.getPosition().getYPosition() + moveY;
-                    checkIfTaken(allPieces, possibleMoves, xPos, yPos);
+                    checkIfPossibleMove(allPieces, possibleMoves, xPos, yPos);
                     moveY = 2;
                 }
             }
@@ -45,7 +45,7 @@ public class KnightPiece extends Piece {
                 for(int j = 0; j < 2; j++) {
                     AlphabeticPosition xPos = AlphabeticPosition.getValue(xPosition);
                     int yPos = this.getPosition().getYPosition() + moveY;
-                    checkIfTaken(allPieces, possibleMoves, xPos, yPos);
+                    checkIfPossibleMove(allPieces, possibleMoves, xPos, yPos);
                     moveY = 1;
                 }
             }
@@ -70,7 +70,7 @@ public class KnightPiece extends Piece {
                 for(int j = 0; j < 2; j++) {
                     AlphabeticPosition xPos = AlphabeticPosition.getValue(xPosition);
                     int yPos = this.getPosition().getYPosition() + moveY;
-                    checkIfTakenByOpponent(ownPieces, opponentPieces, possibleAttacks, xPos, yPos);
+                    checkIfPossibleAttack(ownPieces, opponentPieces, possibleAttacks, xPos, yPos);
                     moveY = 2;
                 }
             }
@@ -80,7 +80,7 @@ public class KnightPiece extends Piece {
                 for(int j = 0; j < 2; j++) {
                     AlphabeticPosition xPos = AlphabeticPosition.getValue(xPosition);
                     int yPos = this.getPosition().getYPosition() + moveY;
-                    checkIfTakenByOpponent(ownPieces, opponentPieces, possibleAttacks, xPos, yPos);
+                    checkIfPossibleAttack(ownPieces, opponentPieces, possibleAttacks, xPos, yPos);
                     moveY = 1;
                 }
             }

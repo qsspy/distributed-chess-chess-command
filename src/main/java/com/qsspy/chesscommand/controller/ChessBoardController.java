@@ -31,11 +31,11 @@ public class ChessBoardController {
     }
 
     @GetMapping()
-    public Response<Void> initialiseGame(
+    public Response<Void> initializeGame(
             @RequestHeader("Game-Topic-Id") final UUID gameTopicId
     ) {
         log.info("Received init game request for id: {}", gameTopicId);
-        boardService.initialiseGame(gameTopicId);
+        boardService.initializeGame(gameTopicId);
         log.info("Game with id {} has been initialised successfully.", gameTopicId);
         return Response.success();
     }

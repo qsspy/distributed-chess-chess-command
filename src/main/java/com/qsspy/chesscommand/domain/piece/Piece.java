@@ -23,7 +23,7 @@ public abstract class Piece {
 
     public abstract Set<BoardPosition> getPossibleSpecialMoves(final Board board);
 
-    protected static boolean checkIfTaken(List<Piece> allPieces, Set<BoardPosition> possibleMoves, AlphabeticPosition xPos, int yPos) {
+    protected static boolean checkIfPossibleMove(List<Piece> allPieces, Set<BoardPosition> possibleMoves, AlphabeticPosition xPos, int yPos) {
         if(xPos != null && yPos >= 1 && yPos <= 8) {
             BoardPosition toPosition = new BoardPosition(xPos, yPos);
             boolean isTakenPosition = allPieces.stream().anyMatch(piece -> piece.getPosition().equals(toPosition));
@@ -36,12 +36,12 @@ public abstract class Piece {
         return true;
     }
 
-    protected static boolean checkIfTakenByOpponent(List<Piece> ownPieces, List<Piece> opponentPieces, Set<BoardPosition> possibleAttacks, AlphabeticPosition xPos, int yPos) {
+    protected static boolean checkIfPossibleAttack(List<Piece> ownPieces, List<Piece> opponentPieces, Set<BoardPosition> possibleAttacks, AlphabeticPosition xPos, int yPos) {
         if(xPos != null && yPos >= 1 && yPos <= 8) {
             BoardPosition toPosition = new BoardPosition(xPos, yPos);
-            boolean isOwnPosition = opponentPieces.stream().anyMatch(piece -> piece.getPosition().equals(toPosition));
+            boolean isOwnPosition = ownPieces.stream().anyMatch(piece -> piece.getPosition().equals(toPosition));
             if(isOwnPosition) {
-                return false;
+                return true;
             }
             boolean isOpponentPosition = opponentPieces.stream().anyMatch(piece -> piece.getPosition().equals(toPosition));
             if(isOpponentPosition) {

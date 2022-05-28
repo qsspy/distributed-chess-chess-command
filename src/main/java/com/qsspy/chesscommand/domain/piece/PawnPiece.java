@@ -26,7 +26,7 @@ public class PawnPiece extends Piece {
 
         AlphabeticPosition xPos = this.getPosition().getXPosition();
         int yPos = this.getPosition().getYPosition() + moveDirection;
-        checkIfTaken(allPieces, possibleMoves, xPos, yPos);
+        checkIfPossibleMove(allPieces, possibleMoves, xPos, yPos);
 
         return possibleMoves;
     }
@@ -40,10 +40,10 @@ public class PawnPiece extends Piece {
 
         AlphabeticPosition leftAttackX = AlphabeticPosition.getValue(this.getPosition().getXPosition().getNumericPosition() - 1);
         int yPos = this.getPosition().getYPosition() + moveDirection;
-        checkIfTakenByOpponent(ownPieces, opponentPieces, possibleAttacks, leftAttackX, yPos);
+        checkIfPossibleAttack(ownPieces, opponentPieces, possibleAttacks, leftAttackX, yPos);
 
         AlphabeticPosition rightAttackX = AlphabeticPosition.getValue(this.getPosition().getXPosition().getNumericPosition() + 1);
-        checkIfTakenByOpponent(ownPieces, opponentPieces, possibleAttacks, rightAttackX, yPos);
+        checkIfPossibleAttack(ownPieces, opponentPieces, possibleAttacks, rightAttackX, yPos);
 
         return possibleAttacks;
     }

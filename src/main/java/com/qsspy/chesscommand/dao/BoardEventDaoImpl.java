@@ -4,10 +4,7 @@ import com.qsspy.chesscommand.domain.BoardEvent;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Repository;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 @Repository
 @Profile("!test")
@@ -32,6 +29,6 @@ public class BoardEventDaoImpl implements BoardEventDao {
 
     @Override
     public List<BoardEvent> get(UUID gameTopicId) {
-        return boardEventLists.get(gameTopicId);
+        return boardEventLists.getOrDefault(gameTopicId, new ArrayList<>());
     }
 }

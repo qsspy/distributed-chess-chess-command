@@ -12,7 +12,7 @@ public interface ChessBoardService {
 
     void calculateBoardStateAndSendMessage(final BoardMoveRequest request, final UUID gameTopicId);
 
-    void initialiseGame(final UUID gameTopicId);
+    void initializeGame(final UUID gameTopicId);
 
     void deleteGame(final UUID gameTopicId);
 }

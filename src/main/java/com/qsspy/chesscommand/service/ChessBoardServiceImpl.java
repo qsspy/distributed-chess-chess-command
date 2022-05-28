@@ -31,7 +31,7 @@ import java.util.*;
 @Slf4j
 @RequiredArgsConstructor
 @Profile("!test")
-public class ChessBoardServiceImpl implements ChessBoardService{
+public class ChessBoardServiceImpl implements ChessBoardService {
 
     private final MessageBrokerHandler<GameStateMessageDTO> brokerHandler;
     private final BoardDao boardDao;
@@ -56,7 +56,7 @@ public class ChessBoardServiceImpl implements ChessBoardService{
             List<Piece> opponentPieces = request.getColor() == PlayerColor.WHITE ? board.getBlack() : board.getWhite();
 
             Piece selectedPiece = ownPieces.stream().filter(piece -> piece.getPieceCode().equals(request.getPieceCode())).findFirst().orElse(null);
-            if(selectedPiece == null) throw new ChessCommandException("Selected piece not found on board");
+            if(selectedPiece == null) throw new ChessCommandException("Selected piece not on board");
             boardEvent.setFromPosition(selectedPiece.getPosition());
 
             // move or attack
@@ -68,14 +68,14 @@ public class ChessBoardServiceImpl implements ChessBoardService{
                 // move
                 int selectedPieceIndex = ownPieces.indexOf(selectedPiece);
                 selectedPiece.setPosition(destination);
-                ownPieces.add(selectedPieceIndex, selectedPiece);
+                ownPieces.set(selectedPieceIndex, selectedPiece);
                 boardEvent.setEvent(EventType.MOVED);
 
             } else if(possibleAttacks.contains(destination)) {
                 // attack
                 int selectedPieceIndex = ownPieces.indexOf(selectedPiece);
                 selectedPiece.setPosition(destination);
-                ownPieces.add(selectedPieceIndex, selectedPiece);
+                ownPieces.set(selectedPieceIndex, selectedPiece);
                 Piece opponentPieceAtDestination = opponentPieces.stream().filter(piece -> piece.getPosition().equals(destination)).findFirst().orElse(null);
                 opponentPieces.remove(opponentPieceAtDestination);
                 boardEvent.setEvent(EventType.KILLED);
@@ -134,7 +134,7 @@ public class ChessBoardServiceImpl implements ChessBoardService{
     }
 
     @Override
-    public void initialiseGame(final UUID gameTopicId) {
+    public void initializeGame(final UUID gameTopicId) {
         List<Piece> blackPieces = getStartingPieces(PlayerColor.BLACK);
         List<Piece> whitePieces = getStartingPieces(PlayerColor.WHITE);
         Board board = new Board(blackPieces, whitePieces);
