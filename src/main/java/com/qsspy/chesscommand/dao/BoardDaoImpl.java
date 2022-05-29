@@ -31,6 +31,6 @@ public class BoardDaoImpl implements BoardDao {
 
     @Override
     public Board get(UUID gameTopicId) {
-        return boards.get(gameTopicId);
+        return boards.getOrDefault(gameTopicId, null);
     }
 }

@@ -16,6 +16,7 @@ import com.qsspy.chesscommand.enums.PlayerColor;
 import com.qsspy.chesscommand.enums.PlayerTurn;
 import com.qsspy.chesscommand.exception.ChessCommandException;
 import com.qsspy.chesscommand.exception.ForbiddenMoveException;
+import com.qsspy.chesscommand.exception.GameAlreadyExistsException;
 import com.qsspy.chesscommand.mapper.BoardEventMapper;
 import com.qsspy.chesscommand.mapper.PieceStateMapper;
 import com.qsspy.chesscommand.mapper.TopicNameMapper;
@@ -42,6 +43,9 @@ public class ChessBoardServiceImpl implements ChessBoardService {
         //TODO to implement
 
         Board board = boardDao.get(gameTopicId);
+        if(board == null) {
+            throw new ChessCommandException("Game for this room is not initialized.");
+        }
         List<BoardEvent> boardEvents = boardEventDao.get(gameTopicId);
 
         GameStateMessageDTO gameStateMessageDTO = new GameStateMessageDTO();
@@ -135,6 +139,11 @@ public class ChessBoardServiceImpl implements ChessBoardService {
 
     @Override
     public void initializeGame(final UUID gameTopicId) {
+        Board checkIfBoardExist = boardDao.get(gameTopicId);
+        if(checkIfBoardExist != null) {
+            throw new GameAlreadyExistsException("Game on this topic already exists.");
+        }
+
         List<Piece> blackPieces = getStartingPieces(PlayerColor.BLACK);
         List<Piece> whitePieces = getStartingPieces(PlayerColor.WHITE);
         Board board = new Board(blackPieces, whitePieces);
