@@ -135,7 +135,6 @@ public class QueenPiece extends Piece {
 
     @Override
     public Set<BoardPosition> getPossibleSpecialMoves(final Board board) {
-        //TODO to implement
         return new HashSet<>();
     }
 }

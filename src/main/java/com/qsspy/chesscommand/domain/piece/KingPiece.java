@@ -65,7 +65,7 @@ public class KingPiece extends Piece {
     // roszada
     @Override
     public Set<BoardPosition> getPossibleSpecialMoves(final Board board) {
-        //TODO to implement
         return new HashSet<>();
     }
+
 }

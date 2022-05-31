@@ -16,14 +16,12 @@ public class BoardDaoImpl implements BoardDao {
 
     @Override
     public Board save(final UUID gameTopicId, final Board board) {
-        //TODO: to implement
         boards.put(gameTopicId, board);
         return board;
     }
 
     @Override
     public Board delete(final UUID gameTopicId) {
-        //TODO: to implement
         Board deletedBoard = boards.get(gameTopicId);
         boards.remove(gameTopicId);
         return deletedBoard;

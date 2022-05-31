@@ -40,8 +40,6 @@ public class ChessBoardServiceImpl implements ChessBoardService {
 
     @Override
     public void calculateBoardStateAndSendMessage(final BoardMoveRequest request, final UUID gameTopicId) {
-        //TODO to implement
-
         Board board = boardDao.get(gameTopicId);
         if(board == null) {
             throw new ChessCommandException("Game for this room is not initialized.");
@@ -50,19 +48,19 @@ public class ChessBoardServiceImpl implements ChessBoardService {
 
         GameStateMessageDTO gameStateMessageDTO = new GameStateMessageDTO();
         BoardEvent boardEvent = new BoardEvent();
-        // zrobienie nowego eventu
+        // create new BoardEvent
         if(request != null) {
-            // TODO: sprawdz czy szach
+            gameStateMessageDTO.setPlayerTurn(request.getColor() == PlayerColor.WHITE ? PlayerTurn.BLACK : PlayerTurn.WHITE);
 
             boardEvent.setFromPieceCode(request.getPieceCode());
             boardEvent.setToPieceCode(request.getSwitchPieceCode());
+
             List<Piece> ownPieces = request.getColor() == PlayerColor.WHITE ? board.getWhite() : board.getBlack();
             List<Piece> opponentPieces = request.getColor() == PlayerColor.WHITE ? board.getBlack() : board.getWhite();
 
             Piece selectedPiece = ownPieces.stream().filter(piece -> piece.getPieceCode().equals(request.getPieceCode())).findFirst().orElse(null);
             if(selectedPiece == null) throw new ChessCommandException("Selected piece not on board");
             boardEvent.setFromPosition(selectedPiece.getPosition());
-
             // move or attack
             BoardPosition destination = new BoardPosition(request.getDestination());
             Set<BoardPosition> possibleMoves = selectedPiece.getPossibleMoves(board);
@@ -75,6 +73,12 @@ public class ChessBoardServiceImpl implements ChessBoardService {
                 ownPieces.set(selectedPieceIndex, selectedPiece);
                 boardEvent.setEvent(EventType.MOVED);
 
+                String switchPieceCode = request.getSwitchPieceCode();
+                if(switchPieceCode != null) {
+                    switchPiece(selectedPiece, destination, switchPieceCode, request.getColor(), ownPieces);
+                    boardEvent.setEvent(EventType.SWITCHED);
+                }
+
             } else if(possibleAttacks.contains(destination)) {
                 // attack
                 int selectedPieceIndex = ownPieces.indexOf(selectedPiece);
@@ -84,24 +88,44 @@ public class ChessBoardServiceImpl implements ChessBoardService {
                 opponentPieces.remove(opponentPieceAtDestination);
                 boardEvent.setEvent(EventType.KILLED);
 
+                // king has been killed, game's finished
+                if(opponentPieceAtDestination instanceof KingPiece) {
+                    gameStateMessageDTO.setPlayerTurn(PlayerTurn.FINISHED);
+                }
+
+                String switchPieceCode = request.getSwitchPieceCode();
+                if(switchPieceCode != null) {
+                    switchPiece(selectedPiece, destination, switchPieceCode, request.getColor(), ownPieces);
+                    boardEvent.setEvent(EventType.SWITCHED);
+                }
+
+                // TODO: roszada
             } else if(possibleSpecialMoves.contains(destination)) {
                 // TODO: special move
+
                 // move pawns by two
+                if(selectedPiece instanceof PawnPiece) {
+                    int selectedPieceIndex = ownPieces.indexOf(selectedPiece);
+                    selectedPiece.setPosition(destination);
+                    ownPieces.set(selectedPieceIndex, selectedPiece);
+                    boardEvent.setEvent(EventType.MOVED);
+                }
 
-                // roszada
+                // castle
 
-                // wymiana na królową
-                throw new ForbiddenMoveException("Forbidden move");
             } else {
                 throw new ForbiddenMoveException("Forbidden move");
             }
 
             boardEvent.setToPosition(destination);
 
+            if(gameStateMessageDTO.getPlayerTurn() != PlayerTurn.FINISHED && checkIfChecked(board, ownPieces, opponentPieces)) {
+                boardEvent.setEvent(EventType.CHECKED);
+            }
+
             board.setBlack(request.getColor() == PlayerColor.BLACK ? ownPieces : opponentPieces);
             board.setWhite(request.getColor() == PlayerColor.WHITE ? ownPieces : opponentPieces);
 
-            gameStateMessageDTO.setPlayerTurn(request.getColor() == PlayerColor.WHITE ? PlayerTurn.BLACK : PlayerTurn.WHITE);
         } else {
             gameStateMessageDTO.setPlayerTurn(PlayerTurn.WHITE);
         }
@@ -110,9 +134,6 @@ public class ChessBoardServiceImpl implements ChessBoardService {
 
         boardDao.save(gameTopicId, board);
         boardEventDao.save(gameTopicId, boardEvents);
-
-        // jezeli szach mat / stalemate - turn ustawiony na finished
-        // ustawić na request startowy if null to board event pusty i turn white ;
 
 
         // convert to dto
@@ -176,5 +197,45 @@ public class ChessBoardServiceImpl implements ChessBoardService {
         }
 
         return pieces;
+    }
+
+    private void switchPiece(Piece selectedPiece, BoardPosition destination, String switchPieceCode, PlayerColor color, List<Piece> playerPieces) {
+        if(selectedPiece instanceof PawnPiece && (destination.getYPosition() == 1 || destination.getYPosition() == 8)) {
+            int selectedPieceIndex = playerPieces.indexOf(selectedPiece);
+
+            // TODO: oblicz numerek do wymienianej figury na podstawie ilości tych figur w playerPieces
+            Piece switchedPiece;
+            int pieceNumber = 3;
+            switch(switchPieceCode) {
+                case "Q":
+                    switchedPiece = new QueenPiece(color, destination, "Q" + pieceNumber);
+                    break;
+                case "R":
+                    switchedPiece = new RookPiece(color, destination, "R" + pieceNumber);
+                    break;
+                case "KN":
+                    switchedPiece = new KnightPiece(color, destination, "KN" + pieceNumber);
+                    break;
+                case "B":
+                    switchedPiece = new BishopPiece(color, destination, "B" + pieceNumber);
+                    break;
+                default:
+                    throw new ChessCommandException("Error while switching piece");
+            }
+            playerPieces.set(selectedPieceIndex, switchedPiece);
+        }
+    }
+
+    private boolean checkIfChecked(Board board, List<Piece> ownPieces, List<Piece> opponentPieces) {
+        Piece opponentKing = opponentPieces.stream().filter(piece -> piece.getPieceCode().equals("K")).findFirst().orElse(null);
+        if(opponentKing == null) throw new ChessCommandException("Error while checking check");
+        for(Piece piece: ownPieces) {
+            Set<BoardPosition> possibleAttacks = piece.getPossibleAttacks(board);
+            if(possibleAttacks.contains(opponentKing.getPosition())) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }

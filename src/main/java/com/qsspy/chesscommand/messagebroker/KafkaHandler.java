@@ -25,9 +25,6 @@ public class KafkaHandler implements MessageBrokerHandler<GameStateMessageDTO> {
 
     @Override
     public void sendBoardMessage(final String gameTopicId, final GameStateMessageDTO messageBody) {
-        //TODO to implement
         kafkaTemplate.send(gameTopicId, messageBody);
-
-
     }
 }

@@ -14,14 +14,12 @@ public class BoardEventDaoImpl implements BoardEventDao {
 
     @Override
     public List<BoardEvent> save(UUID gameTopicId, List<BoardEvent> board) {
-        //TODO to implement
         boardEventLists.put(gameTopicId, board);
         return board;
     }
 
     @Override
     public List<BoardEvent> delete(UUID gameTopicId) {
-        //TODO to implement
         List<BoardEvent> boardEvents = boardEventLists.get(gameTopicId);
         boardEventLists.remove(gameTopicId);
         return boardEvents;
