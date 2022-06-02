@@ -73,6 +73,10 @@ public class ChessBoardServiceImpl implements ChessBoardService {
                 ownPieces.set(selectedPieceIndex, selectedPiece);
                 boardEvent.setEvent(EventType.MOVED);
 
+                if(selectedPiece instanceof KingPiece || selectedPiece instanceof RookPiece) {
+                    selectedPiece.setHasMoved(true);
+                }
+
                 String switchPieceCode = request.getSwitchPieceCode();
                 if(switchPieceCode != null) {
                     switchPiece(selectedPiece, destination, switchPieceCode, request.getColor(), ownPieces);
@@ -99,10 +103,7 @@ public class ChessBoardServiceImpl implements ChessBoardService {
                     boardEvent.setEvent(EventType.SWITCHED);
                 }
 
-                // TODO: roszada
             } else if(possibleSpecialMoves.contains(destination)) {
-                // TODO: special move
-
                 // move pawns by two
                 if(selectedPiece instanceof PawnPiece) {
                     int selectedPieceIndex = ownPieces.indexOf(selectedPiece);
@@ -112,7 +113,33 @@ public class ChessBoardServiceImpl implements ChessBoardService {
                 }
 
                 // castle
+                if(selectedPiece instanceof KingPiece) {
+                    int yCastlePosition = request.getColor() == PlayerColor.WHITE ? 1 : 8;
+                    int selectedPieceIndex = ownPieces.indexOf(selectedPiece);
+                    selectedPiece.setPosition(destination);
+                    ownPieces.set(selectedPieceIndex, selectedPiece);
 
+                    // castle left
+                    if(destination.equals(new BoardPosition(AlphabeticPosition.C, yCastlePosition))) {
+                        Piece leftRook = ownPieces.stream().filter(piece -> piece.getPieceCode().equals("R1")).findFirst().orElse(null);
+                        int leftRookIndex = ownPieces.indexOf(leftRook);
+                        if(leftRook == null) throw new ChessCommandException("Selected piece not on board");
+                        leftRook.setPosition(new BoardPosition(AlphabeticPosition.D, yCastlePosition));
+                        ownPieces.set(leftRookIndex, leftRook);
+                    }
+
+                    // castle right
+                    if(destination.equals(new BoardPosition(AlphabeticPosition.G, yCastlePosition))) {
+                        Piece rightRook = ownPieces.stream().filter(piece -> piece.getPieceCode().equals("R2")).findFirst().orElse(null);
+                        int rightRookIndex = ownPieces.indexOf(rightRook);
+                        if(rightRook == null) throw new ChessCommandException("Selected piece not on board");
+                        rightRook.setPosition(new BoardPosition(AlphabeticPosition.F, yCastlePosition));
+                        ownPieces.set(rightRookIndex, rightRook);
+                    }
+
+                    selectedPiece.setHasMoved(true);
+                    boardEvent.setEvent(EventType.MOVED);
+                }
             } else {
                 throw new ForbiddenMoveException("Forbidden move");
             }
@@ -134,7 +161,6 @@ public class ChessBoardServiceImpl implements ChessBoardService {
 
         boardDao.save(gameTopicId, board);
         boardEventDao.save(gameTopicId, boardEvents);
-
 
         // convert to dto
         List<PieceStateDTO> black = new ArrayList<>();

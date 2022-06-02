@@ -16,6 +16,7 @@ public abstract class Piece {
     protected PlayerColor color;
     protected BoardPosition position;
     protected String pieceCode;
+    protected boolean hasMoved;
 
     public abstract Set<BoardPosition> getPossibleMoves(final Board board);
 

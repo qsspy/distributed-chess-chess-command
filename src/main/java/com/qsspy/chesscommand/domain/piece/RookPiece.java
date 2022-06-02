@@ -4,6 +4,8 @@ import com.qsspy.chesscommand.domain.Board;
 import com.qsspy.chesscommand.domain.BoardPosition;
 import com.qsspy.chesscommand.enums.AlphabeticPosition;
 import com.qsspy.chesscommand.enums.PlayerColor;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.util.HashSet;
 import java.util.List;
@@ -11,13 +13,18 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+@Getter
+@Setter
 public class RookPiece extends Piece {
+
+    private boolean hasMoved;
 
     public RookPiece(PlayerColor color, BoardPosition position, String pieceCode) {
         super();
         this.color = color;
         this.position = position;
         this.pieceCode = pieceCode;
+        this.hasMoved = false;
     }
 
     @Override
