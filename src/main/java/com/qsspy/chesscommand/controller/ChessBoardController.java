@@ -20,6 +20,7 @@ public class ChessBoardController {
     public final ChessBoardService boardService;
 
     @PostMapping()
+    @CrossOrigin(origins = {"http://localhost:3000", "http://localhost:3001"})
     public Response<Void> makeMove(
             @RequestHeader("Game-Topic-Id") final UUID gameTopicId,
             @RequestBody final BoardMoveRequest boardMoveRequest
