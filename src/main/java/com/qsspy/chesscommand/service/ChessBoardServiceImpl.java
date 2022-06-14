@@ -152,12 +152,11 @@ public class ChessBoardServiceImpl implements ChessBoardService {
 
             board.setBlack(request.getColor() == PlayerColor.BLACK ? ownPieces : opponentPieces);
             board.setWhite(request.getColor() == PlayerColor.WHITE ? ownPieces : opponentPieces);
-
+            boardEvents.add(boardEvent);
         } else {
             gameStateMessageDTO.setPlayerTurn(PlayerTurn.WHITE);
         }
 
-        boardEvents.add(boardEvent);
 
         boardDao.save(gameTopicId, board);
         boardEventDao.save(gameTopicId, boardEvents);
