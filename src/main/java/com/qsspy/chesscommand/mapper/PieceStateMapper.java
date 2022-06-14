@@ -13,7 +13,7 @@ public class PieceStateMapper {
     public static PieceStateDTO entityToDTO(Piece piece, Board board) {
         PieceStateDTO pieceStateDTO = new PieceStateDTO();
         pieceStateDTO.setPieceCode(piece.getPieceCode());
-        pieceStateDTO.setPosition(piece.getPosition().toString());
+        pieceStateDTO.setPosition(piece.getPosition().getMergedPosition());
 
         Set<String> possibleMoves = new HashSet<>();
         for(BoardPosition boardPosition: piece.getPossibleMoves(board)) {

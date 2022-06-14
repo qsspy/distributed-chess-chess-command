@@ -16,4 +16,8 @@ public class BoardPosition {
         this.xPosition = AlphabeticPosition.valueOf(String.valueOf(position.charAt(0)));
         this.yPosition = Character.getNumericValue(position.charAt(1));
     }
+
+    public String getMergedPosition() {
+        return xPosition.name() + yPosition;
+    }
 }
