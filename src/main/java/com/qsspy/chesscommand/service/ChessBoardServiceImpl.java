@@ -44,8 +44,12 @@ public class ChessBoardServiceImpl implements ChessBoardService {
         if(board == null) {
             throw new ChessCommandException("Game for this room is not initialized.");
         }
-        if(request != null && !canMakeMoveWithGivenColor(board, request)) {
-            throw new ForbiddenMoveException("Player with this color can not make move right now!");
+
+        if(request != null) {
+            if(!canMakeMoveWithGivenColor(board, request)) {
+                throw new ForbiddenMoveException("Player with this color can not make move right now!");
+            }
+            board.setCurrentAllowedColorToMove(board.getCurrentAllowedColorToMove().inverse());
         }
         List<BoardEvent> boardEvents = boardEventDao.get(gameTopicId);
 
@@ -160,8 +164,6 @@ public class ChessBoardServiceImpl implements ChessBoardService {
             gameStateMessageDTO.setPlayerTurn(PlayerTurn.WHITE);
         }
 
-
-        board.setCurrentAllowedColorToMove(board.getCurrentAllowedColorToMove().inverse());
         boardDao.save(gameTopicId, board);
         boardEventDao.save(gameTopicId, boardEvents);
 
