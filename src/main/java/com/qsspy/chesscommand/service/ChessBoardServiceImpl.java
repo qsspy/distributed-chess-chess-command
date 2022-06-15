@@ -44,7 +44,7 @@ public class ChessBoardServiceImpl implements ChessBoardService {
         if(board == null) {
             throw new ChessCommandException("Game for this room is not initialized.");
         }
-        if(!canMakeMoveWithGivenColor(board, request)) {
+        if(request != null && !canMakeMoveWithGivenColor(board, request)) {
             throw new ForbiddenMoveException("Player with this color can not make move right now!");
         }
         List<BoardEvent> boardEvents = boardEventDao.get(gameTopicId);
